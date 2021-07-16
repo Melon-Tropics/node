@@ -7,6 +7,7 @@ added: v8.5.0
 changes:
   - version:
     - v15.3.0
+    - v14.17.0
     - v12.22.0
     pr-url: https://github.com/nodejs/node/pull/35781
     description: Stabilize modules implementation.
@@ -206,7 +207,7 @@ added:
   - v14.13.1
   - v12.20.0
 changes:
-  - version: REPLACEME
+  - version: v16.0.0
     pr-url: https://github.com/nodejs/node/pull/37246
     description: Added `node:` import support to `require(...)`.
 -->
@@ -246,6 +247,7 @@ readFile('./foo.txt', (err, source) => {
 ```js
 import fs, { readFileSync } from 'fs';
 import { syncBuiltinESMExports } from 'module';
+import { Buffer } from 'buffer';
 
 fs.readFileSync = () => Buffer.from('Hello, ESM');
 syncBuiltinESMExports();
@@ -280,6 +282,15 @@ const buffer = readFileSync(new URL('./data.proto', import.meta.url));
 ```
 
 ### `import.meta.resolve(specifier[, parent])`
+<!--
+added:
+  - v13.9.0
+  - v12.16.2
+changes:
+  - version: v16.2.0
+    pr-url: https://github.com/nodejs/node/pull/38587
+    description: Add support for WHATWG `URL` object to `parentURL` parameter.
+-->
 
 > Stability: 1 - Experimental
 
@@ -377,7 +388,7 @@ analysis process.
 
 For example, consider a CommonJS module written:
 
-```js
+```cjs
 // cjs.cjs
 exports.name = 'exported';
 ```
@@ -809,8 +820,9 @@ globalThis.someInjectedProperty = 42;
 console.log('I just set some globals!');
 
 const { createRequire } = getBuiltin('module');
+const { cwd } = getBuiltin('process');
 
-const require = createRequire(process.cwd() + '/<preload>');
+const require = createRequire(cwd() + '/<preload>');
 // [...]
 `;
 }
@@ -911,8 +923,9 @@ purposes.
 // coffeescript-loader.mjs
 import { URL, pathToFileURL } from 'url';
 import CoffeeScript from 'coffeescript';
+import { cwd } from 'process';
 
-const baseURL = pathToFileURL(`${process.cwd()}/`).href;
+const baseURL = pathToFileURL(`${cwd()}/`).href;
 
 // CoffeeScript files end in .coffee, .litcoffee or .coffee.md.
 const extensionsRegex = /\.coffee$|\.litcoffee$|\.coffee\.md$/;
@@ -1326,17 +1339,17 @@ success!
 [`data:` URLs]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
 [`export`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export
 [`import()`]: #esm_import_expressions
-[`import.meta.url`]: #esm_import_meta_url
 [`import.meta.resolve`]: #esm_import_meta_resolve_specifier_parent
+[`import.meta.url`]: #esm_import_meta_url
 [`import`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
 [`module.createRequire()`]: module.md#module_module_createrequire_filename
 [`module.syncBuiltinESMExports()`]: module.md#module_module_syncbuiltinesmexports
 [`package.json`]: packages.md#packages_node_js_package_json_field_definitions
 [`process.dlopen`]: process.md#process_process_dlopen_module_filename_flags
-[`transformSource` hook]: #esm_transformsource_source_context_defaulttransformsource
 [`string`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String
+[`transformSource` hook]: #esm_transformsource_source_context_defaulttransformsource
 [`util.TextDecoder`]: util.md#util_class_util_textdecoder
-[cjs-module-lexer]: https://github.com/guybedford/cjs-module-lexer/tree/1.1.1
+[cjs-module-lexer]: https://github.com/guybedford/cjs-module-lexer/tree/1.2.1
 [custom https loader]: #esm_https_loader
 [special scheme]: https://url.spec.whatwg.org/#special-scheme
 [the official standard format]: https://tc39.github.io/ecma262/#sec-modules

@@ -14,6 +14,12 @@
 
 #include "math.h"
 
+#if OPENSSL_VERSION_MAJOR >= 3
+#include "openssl/provider.h"
+#endif
+
+#include <openssl/rand.h>
+
 namespace node {
 
 using v8::ArrayBuffer;
@@ -99,20 +105,40 @@ int NoPasswordCallback(char* buf, int size, int rwflag, void* u) {
   return 0;
 }
 
+bool ProcessFipsOptions() {
+  /* Override FIPS settings in configuration file, if needed. */
+  if (per_process::cli_options->enable_fips_crypto ||
+      per_process::cli_options->force_fips_crypto) {
+#if OPENSSL_VERSION_MAJOR >= 3
+    OSSL_PROVIDER* fips_provider = OSSL_PROVIDER_load(nullptr, "fips");
+    if (fips_provider == nullptr)
+      return false;
+    OSSL_PROVIDER_unload(fips_provider);
+
+    return EVP_default_properties_enable_fips(nullptr, 1) &&
+           EVP_default_properties_is_fips_enabled(nullptr);
+#else
+    return FIPS_mode() == 0 && FIPS_mode_set(1);
+#endif
+  }
+  return true;
+}
+
 void InitCryptoOnce() {
 #ifndef OPENSSL_IS_BORINGSSL
   OPENSSL_INIT_SETTINGS* settings = OPENSSL_INIT_new();
 
+#if OPENSSL_VERSION_MAJOR < 3
   // --openssl-config=...
   if (!per_process::cli_options->openssl_config.empty()) {
     const char* conf = per_process::cli_options->openssl_config.c_str();
     OPENSSL_INIT_set_config_filename(settings, conf);
   }
+#endif
 
   OPENSSL_init_ssl(0, settings);
   OPENSSL_INIT_free(settings);
   settings = nullptr;
-#endif
 
 #ifndef _WIN32
   if (per_process::cli_options->secure_heap != 0) {
@@ -133,24 +159,7 @@ void InitCryptoOnce() {
   }
 #endif
 
-  /* Override FIPS settings in cnf file, if needed. */
-  unsigned long err = 0;  // NOLINT(runtime/int)
-  if (per_process::cli_options->enable_fips_crypto ||
-      per_process::cli_options->force_fips_crypto) {
-#if OPENSSL_VERSION_MAJOR >= 3
-    if (0 == EVP_default_properties_is_fips_enabled(nullptr) &&
-        !EVP_default_properties_enable_fips(nullptr, 1)) {
-#else
-    if (0 == FIPS_mode() && !FIPS_mode_set(1)) {
-#endif
-      err = ERR_get_error();
-    }
-  }
-  if (0 != err) {
-    auto* isolate = Isolate::GetCurrent();
-    auto* env = Environment::GetCurrent(isolate);
-    return ThrowCryptoError(env, err);
-  }
+#endif  // OPENSSL_IS_BORINGSSL
 
   // Turn off compression. Saves memory and protects against CRIME attacks.
   // No-op with OPENSSL_NO_COMP builds of OpenSSL.
@@ -197,7 +206,16 @@ void SetFipsCrypto(const FunctionCallbackInfo<Value>& args) {
 
 void TestFipsCrypto(const v8::FunctionCallbackInfo<v8::Value>& args) {
 #ifdef OPENSSL_FIPS
+#if OPENSSL_VERSION_MAJOR >= 3
+  OSSL_PROVIDER* fips_provider = nullptr;
+  if (OSSL_PROVIDER_available(nullptr, "fips")) {
+    fips_provider = OSSL_PROVIDER_load(nullptr, "fips");
+  }
+  const auto enabled = fips_provider == nullptr ? 0 :
+      OSSL_PROVIDER_self_test(fips_provider) ? 1 : 0;
+#else
   const auto enabled = FIPS_selftest() ? 1 : 0;
+#endif
 #else  // OPENSSL_FIPS
   const auto enabled = 0;
 #endif  // OPENSSL_FIPS

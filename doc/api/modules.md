@@ -282,7 +282,7 @@ irrespective of whether or not `./foo` and `./FOO` are the same file.
 <!--type=misc-->
 <!-- YAML
 changes:
-  - version: REPLACEME
+  - version: v16.0.0
     pr-url: https://github.com/nodejs/node/pull/37246
     description: Added `node:` import support to `require(...)`.
 -->
@@ -913,7 +913,9 @@ filename.
 
 ### `module.isPreloading`
 <!-- YAML
-added: v15.4.0
+added:
+  - v15.4.0
+  - v14.17.0
 -->
 
 * Type: {boolean} `true` if the module is running during the Node.js preload
@@ -1009,9 +1011,9 @@ This section was moved to
 [`Error`]: errors.md#errors_class_error
 [`__dirname`]: #modules_dirname
 [`__filename`]: #modules_filename
-[`module` object]: #modules_the_module_object
-[`module.id`]: #modules_module_id
 [`module.children`]: #modules_module_children
+[`module.id`]: #modules_module_id
+[`module` object]: #modules_the_module_object
 [`package.json`]: packages.md#packages_node_js_package_json_field_definitions
 [`path.dirname()`]: path.md#path_path_dirname_path
 [`require.main`]: #modules_require_main

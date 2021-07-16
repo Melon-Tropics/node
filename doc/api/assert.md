@@ -240,6 +240,7 @@ for the verification to take place. The usual pattern would be to call it in a
 
 ```mjs
 import assert from 'assert';
+import process from 'process';
 
 const tracker = new assert.CallTracker();
 
@@ -455,7 +456,7 @@ An alias of [`assert.ok()`][].
 <!-- YAML
 added: v0.1.21
 changes:
-  - version: REPLACEME
+  - version: v16.0.0
     pr-url: https://github.com/nodejs/node/pull/38113
     description: In Legacy assertion mode, changed status from Deprecated to
                  Legacy.
@@ -881,7 +882,7 @@ added:
   - v13.6.0
   - v12.16.0
 changes:
-  - version: REPLACEME
+  - version: v16.0.0
     pr-url: https://github.com/nodejs/node/pull/38111
     description: This API is no longer experimental.
 -->
@@ -1126,7 +1127,7 @@ assert.doesNotThrow(
 <!-- YAML
 added: v0.1.21
 changes:
-  - version: REPLACEME
+  - version: v16.0.0
     pr-url: https://github.com/nodejs/node/pull/38113
     description: In Legacy assertion mode, changed status from Deprecated to
                  Legacy.
@@ -1406,7 +1407,7 @@ added:
   - v13.6.0
   - v12.16.0
 changes:
-  - version: REPLACEME
+  - version: v16.0.0
     pr-url: https://github.com/nodejs/node/pull/38111
     description: This API is no longer experimental.
 -->
@@ -1454,7 +1455,7 @@ instance of an [`Error`][] then it will be thrown instead of the
 <!-- YAML
 added: v0.1.21
 changes:
-  - version: REPLACEME
+  - version: v16.0.0
     pr-url: https://github.com/nodejs/node/pull/38113
     description: In Legacy assertion mode, changed status from Deprecated to
                  Legacy.
@@ -1634,7 +1635,7 @@ instead of the [`AssertionError`][].
 <!-- YAML
 added: v0.1.21
 changes:
-  - version: REPLACEME
+  - version: v16.0.0
     pr-url: https://github.com/nodejs/node/pull/38113
     description: In Legacy assertion mode, changed status from Deprecated to
                  Legacy.
@@ -2420,6 +2421,7 @@ argument.
 [SameValue Comparison]: https://tc39.github.io/ecma262/#sec-samevalue
 [Strict Equality Comparison]: https://tc39.github.io/ecma262/#sec-strict-equality-comparison
 [`AssertionError`]: #assert_class_assert_assertionerror
+[`CallTracker`]: #assert_class_assert_calltracker
 [`Class`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes
 [`ERR_INVALID_RETURN_VALUE`]: errors.md#errors_err_invalid_return_value
 [`Error.captureStackTrace`]: errors.md#errors_error_capturestacktrace_targetobject_constructoropt
@@ -2432,7 +2434,6 @@ argument.
 [`TypeError`]: errors.md#errors_class_typeerror
 [`WeakMap`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap
 [`WeakSet`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet
-[`CallTracker`]: #assert_class_assert_calltracker
 [`assert.deepEqual()`]: #assert_assert_deepequal_actual_expected_message
 [`assert.deepStrictEqual()`]: #assert_assert_deepstrictequal_actual_expected_message
 [`assert.doesNotThrow()`]: #assert_assert_doesnotthrow_fn_error_message
@@ -2447,6 +2448,6 @@ argument.
 [`process.on('exit')`]: process.md#process_event_exit
 [`tracker.calls()`]: #assert_tracker_calls_fn_exact
 [`tracker.verify()`]: #assert_tracker_verify
-[strict assertion mode]: #assert_strict_assertion_mode
 [enumerable "own" properties]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Enumerability_and_ownership_of_properties
 [prototype-spec]: https://tc39.github.io/ecma262/#sec-ordinary-object-internal-methods-and-internal-slots
+[strict assertion mode]: #assert_strict_assertion_mode

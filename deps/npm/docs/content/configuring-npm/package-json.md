@@ -386,6 +386,8 @@ Please make sure that your file(s) referenced in `bin` starts with
 `#!/usr/bin/env node`, otherwise the scripts are started without the node
 executable!
 
+Note that you can also set the executable files using [directories.bin](#directoriesbin).
+
 ### man
 
 Specify either a single file or an array of filenames to put in place for
@@ -547,12 +549,8 @@ had the following:
 }
 ```
 
-and then had a "start" command that then referenced the
-`npm_package_config_port` environment variable, then the user could
-override that by doing `npm config set foo:port 8001`.
-
-See [`config`](/using-npm/config) and [`scripts`](/using-npm/scripts) for
-more on package configs.
+It could also have a "start" command that referenced the
+`npm_package_config_port` environment variable.
 
 ### dependencies
 
@@ -564,7 +562,7 @@ tarball or git URL.
 **Please do not put test harnesses or transpilers or other "development"
 time tools in your `dependencies` object.**  See `devDependencies`, below.
 
-See [semver](/using-npm/semver#versions) for more details about specifying version ranges.
+See [semver](https://github.com/npm/node-semver#versions) for more details about specifying version ranges.
 
 * `version` Must match `version` exactly
 * `>version` Must be greater than `version`

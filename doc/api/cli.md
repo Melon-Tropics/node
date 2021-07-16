@@ -80,7 +80,7 @@ $ node --completion-bash > node_bash_completion
 $ source node_bash_completion
 ```
 
-### `--conditions=condition`
+### `-C=condition`, `--conditions=condition`
 <!-- YAML
 added:
   - v14.9.0
@@ -89,13 +89,19 @@ added:
 
 > Stability: 1 - Experimental
 
-Enable experimental support for custom conditional exports resolution
+Enable experimental support for custom [conditional exports][] resolution
 conditions.
 
 Any number of custom string condition names are permitted.
 
 The default Node.js conditions of `"node"`, `"default"`, `"import"`, and
 `"require"` will always apply as defined.
+
+For example, to run a module with "development" resolutions:
+
+```console
+$ node -C=development app.js
+```
 
 ### `--cpu-prof`
 <!-- YAML
@@ -181,6 +187,19 @@ Make built-in language features like `eval` and `new Function` that generate
 code from strings throw an exception instead. This does not affect the Node.js
 `vm` module.
 
+### `--dns-result-order=order`
+<!-- YAML
+added: v16.4.0
+-->
+
+Set the default value of `verbatim` in [`dns.lookup()`][] and
+[`dnsPromises.lookup()`][]. The value could be:
+* `ipv4first`: sets default `verbatim` `false`.
+* `verbatim`: sets default `verbatim` `true`.
+
+The default is `ipv4first` and [`dns.setDefaultResultOrder()`][] have higher
+priority than `--dns-result-order`.
+
 ### `--enable-fips`
 <!-- YAML
 added: v6.0.0
@@ -210,7 +229,9 @@ modifying the stack trace.
 
 ### `--experimental-abortcontroller`
 <!-- YAML
-added: v15.0.0
+added:
+  - v15.0.0
+  - v14.17.0
 changes:
   - version: v15.0.0
     pr-url: https://github.com/nodejs/node/pull/33527
@@ -565,10 +586,10 @@ added:
 changes:
   - version: v13.13.0
     pr-url: https://github.com/nodejs/node/pull/32520
-    description: Change maximum default size of HTTP headers from 8KB to 16KB.
+    description: Change maximum default size of HTTP headers from 8 KB to 16 KB.
 -->
 
-Specify the maximum size, in bytes, of HTTP headers. Defaults to 16KB.
+Specify the maximum size, in bytes, of HTTP headers. Defaults to 16 KB.
 
 ### `--napi-modules`
 <!-- YAML
@@ -1368,9 +1389,10 @@ node --require "./a.js" --require "./b.js"
 
 Node.js options that are allowed are:
 <!-- node-options-node start -->
-* `--conditions`
+* `--conditions`, `-C`
 * `--diagnostic-dir`
 * `--disable-proto`
+* `--dns-result-order`
 * `--enable-fips`
 * `--enable-source-maps`
 * `--experimental-abortcontroller`
@@ -1667,6 +1689,37 @@ Be aware that unless the child environment is explicitly set, this environment
 variable will be inherited by any child processes, and if they use OpenSSL, it
 may cause them to trust the same CAs as node.
 
+### `TZ`
+<!-- YAML
+added: v0.0.1
+changes:
+  - version:
+     - v16.2.0
+    pr-url: https://github.com/nodejs/node/pull/38642
+    description:
+      Changing the TZ variable using process.env.TZ = changes the timezone
+      on Windows as well.
+  - version:
+     - v13.0.0
+    pr-url: https://github.com/nodejs/node/pull/20026
+    description:
+      Changing the TZ variable using process.env.TZ = changes the timezone
+      on POSIX systems.
+-->
+
+The `TZ` environment variable is used to specify the timezone configuration.
+
+While the Node.js support for `TZ` will not handle all of the various
+[ways that `TZ` is handled in other environments][], it will support basic
+[timezone IDs][] (such as `'Etc/UTC'`, `'Europe/Paris'` or `'America/New_York'`.
+It may support a few other abbreviations or aliases, but these are strongly
+discouraged and not guaranteed.
+
+```console
+$ TZ=Europe/Dublin node -pe "new Date().toString()"
+Wed May 12 2021 20:30:48 GMT+0100 (Irish Standard Time)
+```
+
 ### `UV_THREADPOOL_SIZE=size`
 
 Set the number of threads used in libuv's threadpool to `size` threads.
@@ -1707,8 +1760,8 @@ Sets the max memory size of V8's old memory section. As memory
 consumption approaches the limit, V8 will spend more time on
 garbage collection in an effort to free unused memory.
 
-On a machine with 2GB of memory, consider setting this to
-1536 (1.5GB) to leave some memory for other uses and avoid swapping.
+On a machine with 2 GB of memory, consider setting this to
+1536 (1.5 GB) to leave some memory for other uses and avoid swapping.
 
 ```console
 $ node --max-old-space-size=1536 index.js
@@ -1728,11 +1781,15 @@ $ node --max-old-space-size=1536 index.js
 [`NODE_OPTIONS`]: #cli_node_options_options
 [`NO_COLOR`]: https://no-color.org
 [`SlowBuffer`]: buffer.md#buffer_class_slowbuffer
+[`dns.lookup()`]: dns.md#dns_dns_lookup_hostname_options_callback
+[`dns.setDefaultResultOrder()`]: dns.md#dns_dns_setdefaultresultorder_order
+[`dnsPromises.lookup()`]: dns.md#dns_dnspromises_lookup_hostname_options
 [`process.setUncaughtExceptionCaptureCallback()`]: process.md#process_process_setuncaughtexceptioncapturecallback_fn
 [`tls.DEFAULT_MAX_VERSION`]: tls.md#tls_tls_default_max_version
 [`tls.DEFAULT_MIN_VERSION`]: tls.md#tls_tls_default_min_version
 [`unhandledRejection`]: process.md#process_event_unhandledrejection
 [`worker_threads.threadId`]: worker_threads.md#worker_threads_worker_threadid
+[conditional exports]: packages.md#packages_conditional_exports
 [context-aware]: addons.md#addons_context_aware_addons
 [customizing ESM specifier resolution]: esm.md#esm_customizing_esm_specifier_resolution_algorithm
 [debugger]: debugger.md
@@ -1741,3 +1798,5 @@ $ node --max-old-space-size=1536 index.js
 [jitless]: https://v8.dev/blog/jitless
 [libuv threadpool documentation]: https://docs.libuv.org/en/latest/threadpool.html
 [remote code execution]: https://www.owasp.org/index.php/Code_Injection
+[timezone IDs]: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+[ways that `TZ` is handled in other environments]: https://www.gnu.org/software/libc/manual/html_node/TZ-Variable.html

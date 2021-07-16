@@ -12,6 +12,7 @@ var tty = require('tty');
 var fs$1 = require('fs');
 var events = require('events');
 var assert = require('assert');
+var require$$0$4 = require('url');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -24,6 +25,7 @@ var tty__default = /*#__PURE__*/_interopDefaultLegacy(tty);
 var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs$1);
 var events__default = /*#__PURE__*/_interopDefaultLegacy(events);
 var assert__default = /*#__PURE__*/_interopDefaultLegacy(assert);
+var require$$0__default$1 = /*#__PURE__*/_interopDefaultLegacy(require$$0$4);
 
 var vfileStatistics = statistics;
 
@@ -39714,7 +39716,7 @@ const dependencies$1 = {
 	remark: "^13.0.0",
 	"remark-gfm": "^1.0.0",
 	"remark-lint": "^8.0.0",
-	"remark-preset-lint-node": "^2.0.1",
+	"remark-preset-lint-node": "^2.3.0",
 	"unified-args": "^8.1.0"
 };
 const main = "dist/index.js";
@@ -45048,6 +45050,51 @@ function noTrailingSpaces(ast, file) {
   }
 }
 
+const { pathToFileURL } = require$$0__default$1['default'];
+
+
+
+function* getLinksRecursively(node) {
+  if (node.url) {
+    yield node;
+  }
+  for (const child of node.children || []) {
+    yield* getLinksRecursively(child);
+  }
+}
+
+function validateLinks(tree, vfile) {
+  const currentFileURL = pathToFileURL(path__default['default'].join(vfile.cwd, vfile.path));
+  let previousDefinitionLabel;
+  for (const node of getLinksRecursively(tree)) {
+    if (node.url[0] !== "#") {
+      const targetURL = new URL(node.url, currentFileURL);
+      if (targetURL.protocol === "file:" && !fs__default['default'].existsSync(targetURL)) {
+        vfile.message("Broken link", node);
+      } else if (targetURL.pathname === currentFileURL.pathname) {
+        const expected = node.url.includes("#")
+          ? node.url.slice(node.url.indexOf("#"))
+          : "#";
+        vfile.message(
+          `Self-reference must start with hash (expected "${expected}", got "${node.url}")`,
+          node
+        );
+      }
+    }
+    if (node.type === "definition") {
+      if (previousDefinitionLabel && previousDefinitionLabel > node.label) {
+        vfile.message(
+          `Unordered reference ("${node.label}" should be before "${previousDefinitionLabel}")`,
+          node
+        );
+      }
+      previousDefinitionLabel = node.label;
+    }
+  }
+}
+
+var remarkLintNodejsLinks = unifiedLintRule("remark-lint:nodejs-links", validateLinks);
+
 function isNothing$1(subject) {
   return (typeof subject === 'undefined') || (subject === null);
 }
@@ -49632,7 +49679,7 @@ function validateMeta(node, file, meta) {
 
     case kWrongKeyOrder:
       file.message(
-        "YAML dictionary keys should be respect this order: " +
+        "YAML dictionary keys should be in this order: " +
           allowedKeys.join(", "),
         node
       );
@@ -49667,6 +49714,11 @@ function validateMeta(node, file, meta) {
 
 function validateYAMLComments(tree, file) {
   unistUtilVisit(tree, "html", function visitor(node) {
+    if (node.value.startsWith("<!--YAML\n"))
+      file.message(
+        "Expected `<!-- YAML`, found `<!--YAML`. Please add a space",
+        node
+      );
     if (!node.value.startsWith("<!-- YAML\n")) return;
     try {
       const meta = jsYaml$2.load("#" + node.value.slice(0, -"-->".length));
@@ -49757,8 +49809,8 @@ function prohibitedStrings (ast, file, strings) {
         results.forEach(({ result, index }) => {
           const message = val.yes ? `Use "${val.yes}" instead of "${result}"` : `Do not use "${result}"`;
           file.message(message, {
-            start: location.toPosition(initial + index),
-            end: location.toPosition(initial + index + [...result].length)
+            start: location.toPoint(initial + index),
+            end: location.toPoint(initial + index + [...result].length)
           });
         });
       }
@@ -50527,6 +50579,7 @@ var plugins$2 = [
   remarkLintNoTableIndentation,
   remarkLintNoTabs,
   remarkLintNoTrailingSpaces,
+  remarkLintNodejsLinks,
   remarkLintNodejsYamlComments,
   [
     remarkLintProhibitedStrings,
@@ -50535,6 +50588,7 @@ var plugins$2 = [
       { yes: "GitHub" },
       { no: "hostname", yes: "host name" },
       { yes: "JavaScript" },
+      { no: "[Ll]ong[ -][Tt]erm [Ss]upport", yes: "Long Term Support" },
       { no: "Node", yes: "Node.js", ignoreNextTo: "-API" },
       { yes: "Node.js" },
       { no: "Node[Jj][Ss]", yes: "Node.js" },

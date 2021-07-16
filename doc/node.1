@@ -78,7 +78,7 @@ Aborting instead of exiting causes a core file to be generated for analysis.
 .It Fl -completion-bash
 Print source-able bash completion script for Node.js.
 .
-.It Fl -conditions Ar string
+.It Fl C , Fl -conditions Ar string
 Use custom conditional exports conditions.
 .Ar string
 .
@@ -266,7 +266,7 @@ This flag is inherited from V8 and is subject to change upstream. It may
 disappear in a non-semver-major release.
 .
 .It Fl -max-http-header-size Ns = Ns Ar size
-Specify the maximum size of HTTP headers in bytes. Defaults to 16KB.
+Specify the maximum size of HTTP headers in bytes. Defaults to 16 KB.
 .
 .It Fl -napi-modules
 This option is a no-op.
@@ -454,7 +454,7 @@ Print stack traces for process warnings (including deprecations).
 .It Fl -track-heap-objects
 Track heap object allocations for heap snapshots.
 .
-.It Fl --unhandled-rejections=mode
+.It Fl -unhandled-rejections=mode
 Define the behavior for unhandled rejections. Can be one of `strict` (raise an error), `warn` (enforce warnings) or `none` (silence warnings).
 .
 .It Fl -use-bundled-ca , Fl -use-openssl-ca
@@ -685,7 +685,7 @@ Node.js is available under the MIT license.
 .Pp
 Node.js also includes external libraries that are available under a variety of licenses.
 See
-.Sy https://github.com/nodejs/node/blob/master/LICENSE
+.Sy https://github.com/nodejs/node/blob/HEAD/LICENSE
 for the full license text.
 .
 .\"======================================================================
@@ -698,19 +698,15 @@ Documentation:
 .Sy https://nodejs.org/api/
 .
 .Pp
-GitHub repository & Issue Tracker:
+GitHub repository and issue tracker:
 .Sy https://github.com/nodejs/node
 .
 .Pp
 IRC (general questions):
-.Sy "chat.freenode.net #node.js"
+.Sy "libera.chat #node.js"
 (unofficial)
-.
-.Pp
-IRC (Node.js core development):
-.Sy "chat.freenode.net #node-dev"
 .
 .\"======================================================================
 .Sh AUTHORS
 Written and maintained by 1000+ contributors:
-.Sy https://github.com/nodejs/node/blob/master/AUTHORS
+.Sy https://github.com/nodejs/node/blob/HEAD/AUTHORS

@@ -346,7 +346,9 @@ whenever `rl.prompt()` is called.
 
 ### `rl.getPrompt()`
 <!-- YAML
-added: v15.3.0
+added:
+  - v15.3.0
+  - v14.17.0
 -->
 
 * Returns: {string} the current prompt string
@@ -971,8 +973,8 @@ const { createInterface } = require('readline');
 [TTY]: tty.md
 [TTY keybindings]: #readline_tty_keybindings
 [Writable]: stream.md#stream_writable_streams
-[`'SIGCONT'`]: readline.md#readline_event_sigcont
-[`'SIGTSTP'`]: readline.md#readline_event_sigtstp
+[`'SIGCONT'`]: #readline_event_sigcont
+[`'SIGTSTP'`]: #readline_event_sigtstp
 [`'line'`]: #readline_event_line
 [`fs.ReadStream`]: fs.md#fs_class_fs_readstream
 [`process.stdin`]: process.md#process_process_stdin

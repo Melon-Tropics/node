@@ -38,6 +38,19 @@
 #include <vector>
 #include <unordered_set>
 
+#ifndef T_CAA
+# define T_CAA    257 /* Certification Authority Authorization */
+#endif
+
+// OpenBSD does not define these
+#ifndef AI_ALL
+# define AI_ALL 0
+#endif
+#ifndef AI_V4MAPPED
+# define AI_V4MAPPED 0
+#endif
+
+
 namespace node {
 namespace cares_wrap {
 
@@ -1796,7 +1809,7 @@ void SetLocalAddress(const FunctionCallbackInfo<Value>& args) {
       return;
     }
   } else {
-    // No second arg specifed
+    // No second arg specified
     if (type0 == 4) {
       memset(&addr1, 0, sizeof(addr1));
       ares_set_local_ip6(channel->cares_channel(), addr1);

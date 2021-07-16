@@ -415,7 +415,7 @@ testClosed((opts) => new Writable({ write() {}, ...opts }));
   d._writableState = {};
   d._writableState.finished = true;
   finished(d, { readable: false, writable: true }, common.mustCall((err) => {
-    assert.strictEqual(err, undefined);
+    assert.strictEqual(err.code, 'ERR_STREAM_PREMATURE_CLOSE');
   }));
   d._writableState.errored = true;
   d.emit('close');
@@ -553,14 +553,14 @@ testClosed((opts) => new Writable({ write() {}, ...opts }));
 }
 
 {
-  const server = http.createServer((req, res) => {
-    res.on('close', () => {
+  const server = http.createServer(common.mustCall((req, res) => {
+    res.on('close', common.mustCall(() => {
       finished(res, common.mustCall(() => {
         server.close();
       }));
-    });
+    }));
     res.end();
-  })
+  }))
   .listen(0, function() {
     http.request({
       method: 'GET',
@@ -570,6 +570,21 @@ testClosed((opts) => new Writable({ write() {}, ...opts }));
   });
 }
 
+{
+  const server = http.createServer(common.mustCall((req, res) => {
+    req.on('close', common.mustCall(() => {
+      finished(req, common.mustCall(() => {
+        server.close();
+      }));
+    }));
+    req.destroy();
+  })).listen(0, function() {
+    http.request({
+      method: 'GET',
+      port: this.address().port
+    }).end().on('error', common.mustCall());
+  });
+}
 
 {
   const w = new Writable({
@@ -590,5 +605,28 @@ testClosed((opts) => new Writable({ write() {}, ...opts }));
 
   finished(w, common.mustCall(() => {
     assert.strictEqual(closed, true);
+  }));
+}
+
+{
+  const w = new Writable();
+  const _err = new Error();
+  w.destroy(_err);
+  finished(w, common.mustCall((err) => {
+    assert.strictEqual(_err, err);
+    finished(w, common.mustCall((err) => {
+      assert.strictEqual(_err, err);
+    }));
+  }));
+}
+
+{
+  const w = new Writable();
+  w.destroy();
+  finished(w, common.mustCall((err) => {
+    assert.strictEqual(err.code, 'ERR_STREAM_PREMATURE_CLOSE');
+    finished(w, common.mustCall((err) => {
+      assert.strictEqual(err.code, 'ERR_STREAM_PREMATURE_CLOSE');
+    }));
   }));
 }

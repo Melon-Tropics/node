@@ -1,4 +1,3 @@
-/* eslint-disable node-core/require-common-first, node-core/required-modules */
 'use strict';
 
 const assert = require('assert');
@@ -9,7 +8,7 @@ const path = require('path');
 const { inspect } = require('util');
 const { Worker } = require('worker_threads');
 
-// https://github.com/web-platform-tests/wpt/blob/master/resources/testharness.js
+// https://github.com/web-platform-tests/wpt/blob/HEAD/resources/testharness.js
 // TODO: get rid of this half-baked harness in favor of the one
 // pulled from WPT
 const harnessMock = {

@@ -1,5 +1,5 @@
-const mockNpm = require('../fixtures/mock-npm')
 const t = require('tap')
+const { fake: mockNpm } = require('../fixtures/mock-npm')
 
 let result = ''
 let log = ''
@@ -68,10 +68,9 @@ const DistTag = t.mock('../../lib/dist-tag.js', {
   },
 })
 
+const config = {}
 const npm = mockNpm({
-  config: {
-    global: false,
-  },
+  config,
   output: msg => {
     result = result ? [result, msg].join('\n') : msg
   },
@@ -89,6 +88,20 @@ t.test('ls in current package', (t) => {
     t.matchSnapshot(
       result,
       'should list available tags for current package'
+    )
+    t.end()
+  })
+})
+
+t.test('ls global', (t) => {
+  t.teardown(() => {
+    config.global = false
+  })
+  config.global = true
+  distTag.exec(['ls'], (err) => {
+    t.matchSnapshot(
+      err,
+      'should throw basic usage'
     )
     t.end()
   })
@@ -349,6 +362,10 @@ t.test('add using valid semver range as name', (t) => {
 
 t.test('add missing args', (t) => {
   npm.prefix = t.testdir({})
+  config.tag = ''
+  t.teardown(() => {
+    delete config.tag
+  })
   distTag.exec(['add', '@scoped/another@7.7.7'], (err) => {
     t.matchSnapshot(err, 'should exit usage error message')
     t.end()

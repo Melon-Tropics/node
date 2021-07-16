@@ -122,6 +122,18 @@ The properties included on each object include:
 `nice` values are POSIX-only. On Windows, the `nice` values of all processors
 are always 0.
 
+## `os.devNull`
+<!-- YAML
+added: v16.3.0
+-->
+
+* {string}
+
+The platform-specific file path of the null device.
+
+* `\\.\nul` on Windows
+* `/dev/null` on POSIX
+
 ## `os.endianness()`
 <!-- YAML
 added: v0.9.4
@@ -367,18 +379,6 @@ changes:
 * Returns: {integer}
 
 Returns the system uptime in number of seconds.
-
-The value returned can be inaccurate in some
-rare virtualization cases. The issue arises when the virtualized
-guest instance shares the kernel with the host system.
-Due to the fact that libuv uses a syscall that
-provides host's uptime instead of guest's
-uptime on OpenVZ, `os.uptime()` may also provide
-erroneous result.
-
-Please refer to <https://github.com/nodejs/node/issues/36244> and
-<https://github.com/libuv/libuv/issues/3068> for an exploration of
-this issue, until it is resolved by libuv.
 
 ## `os.userInfo([options])`
 <!-- YAML

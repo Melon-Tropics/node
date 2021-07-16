@@ -50,15 +50,18 @@ class ExternalReferenceRegistry {
   V(async_wrap)                                                                \
   V(binding)                                                                   \
   V(buffer)                                                                    \
+  V(contextify)                                                                \
   V(credentials)                                                               \
   V(env_var)                                                                   \
   V(errors)                                                                    \
   V(fs)                                                                        \
   V(fs_dir)                                                                    \
+  V(fs_event_wrap)                                                             \
   V(handle_wrap)                                                               \
   V(heap_utils)                                                                \
   V(messaging)                                                                 \
   V(native_module)                                                             \
+  V(performance)                                                               \
   V(process_methods)                                                           \
   V(process_object)                                                            \
   V(task_queue)                                                                \

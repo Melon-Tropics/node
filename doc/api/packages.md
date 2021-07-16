@@ -291,7 +291,7 @@ import submodule from 'es-module-package/private-module.js';
 ```
 
 ### Subpath imports
-<!--YAML
+<!-- YAML
 added:
   - v14.6.0
   - v12.19.0
@@ -333,10 +333,10 @@ The resolution rules for the imports field are otherwise
 analogous to the exports field.
 
 ### Subpath patterns
-<!--YAML
+<!-- YAML
 added:
   - v14.13.0
-  - v12.19.0
+  - v12.20.0
 -->
 
 For packages with a small number of exports or imports, we recommend
@@ -357,6 +357,9 @@ For these use cases, subpath export patterns can be used instead:
   }
 }
 ```
+
+**`*` maps expose nested subpaths as it is a string replacement syntax
+only.**
 
 The left hand matching pattern must always end in `*`. All instances of `*` on
 the right hand side will then be replaced with this value, including if it
@@ -383,10 +386,30 @@ treating the right hand side target pattern as a `**` glob against the list of
 files within the package. Because `node_modules` paths are forbidden in exports
 targets, this expansion is dependent on only the files of the package itself.
 
+To exclude private subfolders from patterns, `null` targets can be used:
+
+```json
+// ./node_modules/es-module-package/package.json
+{
+  "exports": {
+    "./features/*": "./src/features/*.js",
+    "./features/private-internal/*": null
+  }
+}
+```
+
+```js
+import featureInternal from 'es-module-package/features/private-internal/m';
+// Throws: ERR_PACKAGE_PATH_NOT_EXPORTED
+
+import featureX from 'es-module-package/features/x';
+// Loads ./node_modules/es-module-package/src/features/x.js
+```
+
 ### Subpath folder mappings
 <!-- YAML
 changes:
-  - version: REPLACEME
+  - version: v16.0.0
     pr-url: https://github.com/nodejs/node/pull/37215
     description: Runtime deprecation.
   - version: v15.1.0
@@ -428,7 +451,7 @@ The benefit of patterns over folder exports is that packages can always be
 imported by consumers without subpath file extensions being necessary.
 
 ### Exports sugar
-<!--YAML
+<!-- YAML
 added: v12.11.0
 -->
 
@@ -455,7 +478,7 @@ can be written:
 ```
 
 ### Conditional exports
-<!--YAML
+<!-- YAML
 added:
   - v13.2.0
   - v12.16.0
@@ -587,7 +610,7 @@ Any number of custom conditions can be set with repeat flags.
 
 The `"import"`, `"require"`, `"node"` and `"default"` conditions are defined
 and implemented in Node.js core,
-[as specified above](#esm_conditional_exports).
+[as specified above](#packages_conditional_exports).
 
 Other condition strings are unknown to Node.js and thus ignored by default.
 Runtimes or tools other than Node.js can use them at their discretion.
@@ -612,9 +635,9 @@ Platform specific conditions such as `"deno"`, `"electron"`, or `"react-native"`
 may be used, but while there remain no implementation or integration intent
 from these platforms, the above are not explicitly endorsed by Node.js.
 
-New conditions definitions may be added to this list by creating a PR to the
-[Node.js documentation for this section][]. The requirements for listing a
-new condition definition here are that:
+New conditions definitions may be added to this list by creating a pull request
+to the [Node.js documentation for this section][]. The requirements for listing
+a new condition definition here are that:
 
 * The definition should be clear and unambiguous for all implementers.
 * The use case for why the condition is needed should be clearly justified.
@@ -630,7 +653,7 @@ The above definitions may be moved to a dedicated conditions registry in due
 course.
 
 ### Self-referencing a package using its name
-<!--YAML
+<!-- YAML
 added:
   - v13.1.0
   - v12.16.0
@@ -681,7 +704,7 @@ import { another } from 'a-package/m.mjs';
 Self-referencing is also available when using `require`, both in an ES module,
 and in a CommonJS one. For example, this code will also work:
 
-```js
+```cjs
 // ./a-module.js
 const { something } = require('a-package/foo'); // Loads from ./foo.js.
 ```
@@ -782,9 +805,9 @@ The preceding example uses explicit extensions `.mjs` and `.cjs`.
 If your files use the `.js` extension, `"type": "module"` will cause such files
 to be treated as ES modules, just as `"type": "commonjs"` would cause them
 to be treated as CommonJS.
-See [Enabling](#esm_enabling).
+See [Enabling](esm.md#esm_enabling).
 
-```js
+```cjs
 // ./node_modules/pkg/index.cjs
 exports.name = 'value';
 ```
@@ -897,7 +920,7 @@ CommonJS and ES module instances of the package:
    CommonJS and ES module versions of the package. For example, if the CommonJS
    and ES module entry points are `index.cjs` and `index.mjs`, respectively:
 
-    ```js
+    ```cjs
     // ./node_modules/pkg/index.cjs
     const state = require('./state.cjs');
     module.exports.state = state;
@@ -1011,7 +1034,7 @@ The `"main"` field defines the script that is used when the [package directory
 is loaded via `require()`](modules.md#modules_folders_as_modules). Its value
 is a path.
 
-```js
+```cjs
 require('./path/to/directory'); // This resolves to ./path/to/directory/main.js.
 ```
 
@@ -1076,6 +1099,7 @@ added: v12.7.0
 changes:
   - version:
     - v14.13.0
+    - v12.20.0
     pr-url: https://github.com/nodejs/node/pull/34718
     description: Add support for `"exports"` patterns.
   - version:
@@ -1118,7 +1142,9 @@ All paths defined in the `"exports"` must be relative file URLs starting with
 
 ### `"imports"`
 <!-- YAML
-added: v14.6.0
+added:
+ - v14.6.0
+ - v12.19.0
 -->
 
 * Type: {Object}
@@ -1145,23 +1171,23 @@ Import maps permit mapping to external packages.
 This field defines [subpath imports][] for the current package.
 
 [Babel]: https://babeljs.io/
-[Conditional exports]: #packages_conditional_exports
 [CommonJS]: modules.md
+[Conditional exports]: #packages_conditional_exports
 [ES module]: esm.md
 [ES modules]: esm.md
 [Node.js documentation for this section]: https://github.com/nodejs/node/blob/HEAD/doc/api/packages.md#conditions-definitions
-[`ERR_PACKAGE_PATH_NOT_EXPORTED`]: errors.md#errors_err_package_path_not_exported
-[`esm`]: https://github.com/standard-things/esm#readme
 [`"exports"`]: #packages_exports
+[`"imports"`]: #packages_imports
 [`"main"`]: #packages_main
 [`"name"`]: #packages_name
-[`"imports"`]: #packages_imports
 [`"type"`]: #packages_type
+[`ERR_PACKAGE_PATH_NOT_EXPORTED`]: errors.md#errors_err_package_path_not_exported
+[`esm`]: https://github.com/standard-things/esm#readme
 [`package.json`]: #packages_node_js_package_json_field_definitions
 [entry points]: #packages_package_entry_points
 [self-reference]: #packages_self_referencing_a_package_using_its_name
 [subpath exports]: #packages_subpath_exports
 [subpath imports]: #packages_subpath_imports
 [subpath patterns]: #packages_subpath_patterns
-[the full specifier path]: esm.md#esm_mandatory_file_extensions
 [the dual CommonJS/ES module packages section]: #packages_dual_commonjs_es_module_packages
+[the full specifier path]: esm.md#esm_mandatory_file_extensions
